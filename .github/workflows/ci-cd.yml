@@ -25,9 +25,9 @@ jobs:
         pip install -r requirements.txt
 
     - name: Execução dos testes e verificação de cobertura
-    env:
-          PYTHONPATH: .
-          POKEAPI_URL: https://pokeapi.co/api/v2/pokemon/
-          REDIS_URL: redis://localhost:6379/0
-        run: |
-          pytest --cov=app tests/ --cov-report=term-missing
+      env:
+        PYTHONPATH: .
+        POKEAPI_URL: https://pokeapi.co/api/v2/pokemon/
+        REDIS_URL: redis://localhost:6379/0
+      run: |
+        pytest --cov=app tests/ --cov-report=term-missing
