@@ -1,5 +1,12 @@
 # 🚀 PokeFast API
 
+## 🔗 Links do Projeto em Produção (Deploy)
+
+O projeto foi publicado com sucesso e está disponível publicamente nos seguintes links:
+
+* **API Online (Render):** [https://pokefast-api-ebac.onrender.com](https://pokefast-api-ebac.onrender.com)
+* **Documentação Interativa (Swagger UI):** [https://pokefast-api-ebac.onrender.com/docs](https://pokefast-api-ebac.onrender.com/docs)
+
 Uma API RESTful assíncrona, robusta e paginada construída em Python com **FastAPI**. O projeto consome dados reais da [PokéAPI](https://pokeapi.co/) original e expõe endpoints padronizados, contando com testes unitários automatizados, cobertura de código, containerização em Docker e pipeline de CI/CD via GitHub Actions.
 
 ---
@@ -222,7 +229,7 @@ O FastAPI gera a documentação automaticamente. Com a API rodando, acesse:
 
 ## 🚀 Links de Produção
 
-* **Link da API em Produção**: `https://sua-api-no-render.onrender.com` 
+* **Link da API em Produção**: `https://pokefast-api-ebac.onrender.com` 
 
 ```
 
