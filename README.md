@@ -227,3 +227,26 @@ O FastAPI gera a documentação automaticamente. Com a API rodando, acesse:
 ```
 
 ```
+## 📸 Demonstração da API e Evidências de Testes
+
+Para comprovação dos critérios técnicos exigidos, seguem os registros visuais das respostas estruturadas da API, testes locais e integração contínua:
+
+### 1. Listagem Geral Paginada (`GET /pokemons`)
+Endpoint responsável por listar os Pokémons consumidos de forma assíncrona da PokéAPI, contendo a paginação estruturada dinamicamente com os campos `total`, `limit`, `offset`, `next` e `previous`:
+![Listagem Paginada](./screenshots/listagem.jpg)
+
+### 2. Busca por ID ou Nome (`GET /pokemons/{id_or_name}`)
+Endpoint de busca detalhada aplicando o tratamento de strings nativo (.strip().lower()). O retorno traz exatamente os campos mapeados (`id`, `name`, `height`, `weight`, `types` e o objeto estruturado de `sprites`):
+![Busca Detalhada por Nome](./screenshots/detalhes.jpg)
+
+### 3. Documentação Automatizada e Interativa (Swagger UI)
+Visão geral da estrutura gerada automaticamente pelo FastAPI mapeando e documentando de forma clara as rotas construídas:
+![Swagger UI](./screenshots/swagger.jpg)
+
+### 4. Cobertura de Testes Automatizados (Pytest-Cov)
+Execução da suíte de testes unitários localmente através do ambiente do Codespaces, atingindo com sucesso **95% de cobertura total** do código da aplicação:
+![Cobertura de Testes](./screenshots/teste-passou.JPG)
+
+### 5. Integração Contínua (GitHub Actions Pipeline)
+Esteira de CI/CD configurada via GitHub Actions executando com sucesso e sem falhas todas as validações estruturais e testes automáticos a cada commit realizado:
+![Pipeline de CI/CD](./screenshots/teste-ci.JPG)
