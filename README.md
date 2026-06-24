@@ -246,6 +246,16 @@ Endpoint responsável por listar os Pokémons consumidos de forma assíncrona da
 Endpoint de busca detalhada aplicando o tratamento de strings nativo (.strip().lower()). O retorno traz exatamente os campos mapeados (`id`, `name`, `height`, `weight`, `types` e o objeto estruturado de `sprites`):
 ![Busca Detalhada por Nome](./screenshots/detalhes.JPG)
 
+### 2. Busca por ID ou Nome (`GET /pokemons/{id_or_name}`)
+
+#### A) Retorno com Sucesso (Status 200)
+Exemplo de requisição retornando os detalhes filtrados e tratados de um Pokémon existente:
+![Busca Detalhada por Nome](./screenshots/detalhes.JPG)
+
+#### B) Tratamento de Erro - Pokémon Não Encontrado (Status 404)
+Demonstração de resiliência da API ao lidar com parâmetros inválidos, retornando o status HTTP correto e uma mensagem clara para o usuário:
+![Erro Pokémon Não Encontrado](./screenshots/erro-404.JPG)
+
 ### 3. Documentação Automatizada e Interativa (Swagger UI)
 Visão geral da estrutura gerada automaticamente pelo FastAPI mapeando e documentando de forma clara as rotas construídas:
 ![Swagger UI](./screenshots/swagger.JPG)
