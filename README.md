@@ -132,57 +132,43 @@ pytest --cov=app tests/ --cov-report=term-missing
 Abaixo estão documentadas as evidências visuais coletadas diretamente da interface do Swagger UI e dos ambientes operacionais, comprovando a eficácia e a conformidade técnica com o que foi exigido pelo corpo docente:
 
 ### 1. Integração Externa e Links Paginados (`GET /pokemons`)
-
 Consumo em lote paralelo dos dados da PokéAPI externa, gerando links dinâmicos de paginação de forma automatizada:
-
+![Listagem Paginada](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/listagem.JPG)
 
 ### 2. Busca Detalhada com Sucesso (`GET /pokemons/{id_or_name}`)
-
 Mapeamento de tipos estruturados com tratamento completo para desconsiderar espaços e caixas altas:
-
+![Busca Detalhada por Nome](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/detalhes.JPG)
 
 ### 3. Resiliência e Erro Tratado (Status 404 Not Found)
-
 Tratamento nativo de exceções emitindo o código HTTP correto e o payload limpo esperado pelos testes unitários:
-
+![Erro Pokémon Não Encontrado](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/erro-404.JPG)
 
 ### 4. Documentação Automatizada Interativa (Swagger UI)
-
 Interface interativa mapeando claramente as rotas de consumo externo e os endpoints dedicados ao gerenciamento do repositório persistente local:
-
+![Swagger UI](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/swagger.JPG)
 
 ### 5. Persistência de Dados - Inserção Local (`POST /pokemons/local`)
-
 **[CREATE]** Endpoint responsável por criar e gravar um novo registro customizado fisicamente no banco de dados SQLite através do SQLAlchemy:
-
+![Cadastro Local](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/1-create-local.jpg)
 
 ### 6. Consulta Geral do Repositório (`GET /pokemons/local/all`)
-
 **[READ ALL]** Recuperação em tempo real de todos os Pokémons customizados salvos localmente:
-
+![Listagem Local](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/2-read-all-local.jpg)
 
 ### 7. Atualização de Propriedades (`PUT /pokemons/local/{pokemon_id}`)
-
 **[UPDATE]** Edição completa de um registro relacional referenciado por sua respectiva chave primária:
-
+![Atualização Local](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/3-update-local.jpg)
 
 ### 8. Exclusão Física de Registro (`DELETE /pokemons/local/{pokemon_id}`)
-
 **[DELETE]** Remoção definitiva de um Pokémon do banco de dados local com retorno apropriado de status `204 No Content`:
-
+![Exclusão Local](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/4-delete-local.jpg)
 
 ### 9. Cobertura de Código Local (Pytest-Cov)
-
 Execução local da suite de testes alcançando alto índice de cobertura da lógica implementada no ecossistema:
-
+![Cobertura de Testes](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/teste-passou.JPG)
 
 ### 10. Integração Contínua (GitHub Actions Pipeline)
-
 Esteira de CI/CD automatizada validando com absoluto sucesso todas as builds e testes a cada modificação submetida:
-
-
----
-
-Developed with 💻 inside GitHub Codespaces.
+![Pipeline de CI/CD](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/teste-ci.JPG)
 
 ```
