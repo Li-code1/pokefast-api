@@ -36,7 +36,7 @@ class PokemonLocalResponse(BaseModel):
 
 
 # ==============================================================================
-# 🌐 1. ENDPOINTS ORIGINAIS - CONSUMO DA POKEAPI (COM ASYNCIO.GATHER & REDIS)
+# 1. ENDPOINTS - CONSUMO DA POKEAPI EXTERNA
 # ==============================================================================
 
 @router.get("", response_model=PaginatedPokemonResponse)
@@ -71,32 +71,18 @@ async def list_pokemons(
         }
     }
 
-@router.get("/api/{id_or_name}", response_model=PokemonResponse)
-async def get_pokemon(id_or_name: str):
-    """
-    Busca os detalhes de um Pokémon específico utilizando o ID ou o Nome na PokéAPI externa.
-    """
-    cleaned_param = id_or_name.strip().lower()
-    
-    pokemon = await get_pokemon_by_id_or_name(cleaned_param)
-    if not pokemon:
-        raise HTTPException(status_code=404, detail="Pokémon não encontrado na PokéAPI externa")
-    return pokemon
-
 
 # ==============================================================================
-# 🗄️ 2. NOVOS ENDPOINTS - CRUD COMPLETO NO BANCO DE DADOS LOCAL (SQLALCHEMY)
+# 2. ENDPOINTS - CRUD COMPLETO NO BANCO DE DADOS LOCAL (SQLALCHEMY)
 # ==============================================================================
 
 @router.post("/local", response_model=PokemonLocalResponse, status_code=status.HTTP_201_CREATED)
 def create_pokemon_local(pokemon: PokemonLocalCreate, db: Session = Depends(get_db)):
     """
     [CREATE] Cria e persiste um novo Pokémon customizado no banco de dados SQLite local.
-    Aplica o tratamento obrigatório de strings (.strip().lower()).
     """
     cleaned_name = pokemon.name.strip().lower()
     
-    # Verifica duplicidade no banco próprio
     db_exists = db.query(PokemonDB).filter(PokemonDB.name == cleaned_name).first()
     if db_exists:
         raise HTTPException(
@@ -108,7 +94,7 @@ def create_pokemon_local(pokemon: PokemonLocalCreate, db: Session = Depends(get_
         name=cleaned_name,
         height=pokemon.height,
         weight=pokemon.weight,
-        types=",".join(pokemon.types),  # Converte lista em string persistível
+        types=",".join(pokemon.types),
         sprite_front=pokemon.sprite_front,
         sprite_back=pokemon.sprite_back
     )
@@ -127,7 +113,7 @@ def read_all_pokemons_local(db: Session = Depends(get_db)):
 @router.get("/local/{id_or_name}", response_model=PokemonLocalResponse)
 def read_pokemon_local(id_or_name: str, db: Session = Depends(get_db)):
     """
-    [READ BY ID/NAME] Consulta detalhada no banco próprio por ID numérico ou Nome tratado.
+    [READ BY ID/NAME LOCAL] Consulta detalhada no banco próprio.
     """
     cleaned_param = id_or_name.strip().lower()
     
@@ -180,3 +166,21 @@ def delete_pokemon_local(pokemon_id: int, db: Session = Depends(get_db)):
     db.delete(db_pokemon)
     db.commit()
     return None
+
+
+# ==============================================================================
+# 3. RETORNO DA ROTA ORIGINAL ESPERADA PELOS TESTES UNITÁRIOS
+# ==============================================================================
+
+@router.get("/{id_or_name}", response_model=PokemonResponse)
+async def get_pokemon(id_or_name: str):
+    """
+    Busca os detalhes de um Pokémon específico utilizando o ID ou o Nome na PokéAPI externa.
+    Posicionado ao final para não interceptar as chamadas dos endpoints '/local'.
+    """
+    cleaned_param = id_or_name.strip().lower()
+    
+    pokemon = await get_pokemon_by_id_or_name(cleaned_param)
+    if not pokemon:
+        raise HTTPException(status_code=404, detail="Pokémon não encontrado")
+    return pokemon
