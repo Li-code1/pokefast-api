@@ -1,26 +1,29 @@
 # 🚀 PokeFast API
 
+Uma API RESTful de alta performance desenvolvida com **FastAPI**, focada no consumo otimizado da PokéAPI original utilizando concorrência paralela, gerenciamento estratégico de cache com Redis e persistência local de dados com SQLite.
+
+O projeto foi totalmente expandido para suportar um ecossistema híbrido: consumo dinâmico e otimizado de microsserviços externos e um repositório relacional local para operações completas de CRUD.
+
+---
+
 ## 🔗 Links do Projeto em Produção (Deploy)
 
-O projeto foi publicado com sucesso e está disponível publicamente nos seguintes links:
+A aplicação está publicada de forma totalmente funcional e pode ser acessada nos seguintes endereços:
 
 * **API Online (Render):** [https://pokefast-api-ebac.onrender.com](https://pokefast-api-ebac.onrender.com)
 * **Documentação Interativa (Swagger UI):** [https://pokefast-api-ebac.onrender.com/docs](https://pokefast-api-ebac.onrender.com/docs)
-
-Uma API RESTful assíncrona, robusta e paginada construída em Python com **FastAPI**. O projeto consome dados reais da [PokéAPI](https://pokeapi.co/) original e expõe endpoints padronizados, contando com testes unitários automatizados, cobertura de código, containerização em Docker e pipeline de CI/CD via GitHub Actions.
 
 ---
 
 ## 📋 Funcionalidades e Requisitos Atendidos
 
-- **FastAPI & Python 3.10+**: Desenvolvimento utilizando tipagem estrita (*type hints*) em todas as funções.
-- **Consumo de Dados Paginado**: Integração assíncrona com os endpoints da PokéAPI usando `httpx`.
-- **Endpoints Completos**: 
-  - `GET /pokemons`: Listagem estruturada com paginação inteligente via parâmetros `limit` e `offset`.
-  - `GET /pokemons/{id_or_name}`: Busca detalhada de um Pokémon específico por ID ou Nome.
-- **Testes Unitários**: Cobertura das rotas de sucesso, paginação e tratamento de erro (404 Not Found) usando `pytest` e `pytest-cov`.
-- **Dockerização**: Arquivo `Dockerfile` otimizado para produção.
-- **CI/CD Pipeline**: Automação de testes e checagem de cobertura integrada ao GitHub Actions a cada push na branch principal.
+* **FastAPI & Python 3.10+**: Desenvolvimento estruturado utilizando tipagem estrita (*type hints*) e injeção de dependências corporativa.
+* **Processamento Concorrente**: Otimização drástica do tempo de resposta na listagem utilizando `asyncio.gather()` para disparar requisições simultâneas em um pool de conexões reutilizável (`httpx.AsyncClient`).
+* **Gerenciamento de Cache**: Integração ativa com o **Redis** para armazenamento temporário estratégico (TTL) de listagens e detalhes de Pokémons, poupando requisições repetidas à API externa.
+* **Persistência Relacional Local (CRUD)**: Mapeamento ORM completo com **SQLAlchemy** e banco de dados **SQLite** para criação, leitura, atualização e deleção física de registros customizados.
+* **Tratamento Resiliente de Strings**: Sanitização forçada e automática em todos os parâmetros de entrada utilizando métodos nativos (`.strip().lower()`).
+* **Testes Automatizados**: Suíte de testes unitários com validação de status HTTP, payloads de resposta e fluxos de exceção (404 Not Found) usando `pytest` e `pytest-cov`.
+* **CI/CD Pipeline**: Automação total integrada ao GitHub Actions para verificação de testes e integridade do código a cada push na branch principal.
 
 ---
 
@@ -34,17 +37,19 @@ pokefast-api/
 │       └── ci-cd.yml           # Configuração da esteira de CI/CD (GitHub Actions)
 │
 ├── app/
-│   ├── main.py                 # Inicializador e configuração da API FastAPI
+│   ├── main.py                 # Inicializador da API e criação automática das tabelas SQL
+│   ├── database.py             # Configuração da Engine SessionLocal e conexão SQLite
 │   ├── __init__.py             # Inicializador do pacote app
 │   │
 │   ├── models/
-│   │   └── __init__.py         # Esquemas de validação e tipagem Pydantic
+│   │   ├── __init__.py         # Esquemas de validação e tipagem Pydantic
+│   │   └── pokemon.py          # Modelo de Tabela Relacional ORM (SQLAlchemy)
 │   │
 │   ├── routes/
-│   │   └── pokemons.py         # Endpoints e controle de paginação
+│   │   └── pokemons.py         # Endpoints da PokéAPI e Rotas de CRUD Local (/local)
 │   │
 │   ├── services/
-│   │   └── poke_service.py     # Comunicação assíncrona com a PokéAPI externa
+│   │   └── poke_service.py     # Lógica assíncrona com asyncio.gather e cache no Redis
 │   │
 │   └── utils/
 │       └── formatters.py       # Funções auxiliares de formatação de strings
@@ -52,13 +57,13 @@ pokefast-api/
 ├── tests/
 │   └── test_pokemons.py        # Suíte de testes unitários com pytest
 │
-├── .env                        # Variáveis de ambiente locais
-├── .gitignore                  # Arquivos ignorados pelo Git
+├── .gitignore                  # Arquivos ignorados pelo Git (incluindo pokemons.db)
 ├── celery_app.py               # Configuração da instância e broker do Celery
 ├── docker-compose.yml          # Orquestração dos containers (API e Redis)
 ├── Dockerfile                  # Instruções de montagem da imagem Docker
-├── requirements.txt            # Dependências estruturadas do projeto
-└── tasks.py                    # Definição das tarefas em background e cache
+├── requirements.txt            # Dependências estruturadas do projeto (com SQLAlchemy)
+├── tasks.py                    # Definição das tarefas em background e cache
+└── README.md                   # Documentação oficial do projeto
 
 ```
 
@@ -69,12 +74,13 @@ pokefast-api/
 ### Pré-requisitos
 
 * Python 3.10 ou superior instalado.
+* Serviço do Redis rodando localmente (ou via Docker).
 
 ### Passo a Passo
 
 1. **Clone o repositório:**
 ```bash
-git clone [https://github.com/Li-code1/pokefast-api.git](https://github.com/seu-usuario/pokefast-api.git)
+git clone [https://github.com/Li-code1/pokefast-api.git](https://github.com/Li-code1/pokefast-api.git)
 cd pokefast-api
 
 ```
@@ -83,7 +89,7 @@ cd pokefast-api
 2. **Crie e ative um ambiente virtual:**
 ```bash
 python -m venv .venv
-# No Windows (Prompt de Comando):
+# No Windows:
 .venv\Scripts\activate
 # No Linux/macOS:
 source .venv/bin/activate
@@ -91,35 +97,28 @@ source .venv/bin/activate
 ```
 
 
-3. **Instale as dependências:**
+3. **Instale as dependências atualizadas:**
 ```bash
 pip install -r requirements.txt
 
 ```
 
 
-4. **Configure o arquivo `.env`:**
-Crie um arquivo chamado `.env` na raiz do projeto com o seguinte conteúdo:
-```env
-POKEAPI_URL=[https://pokeapi.co/api/v2/pokemon/](https://pokeapi.co/api/v2/pokemon/)
-
-```
-
-
-5. **Inicie o servidor de desenvolvimento:**
+4. **Inicie o servidor de desenvolvimento:**
 ```bash
-uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload
 
 ```
 
 
-A API estará disponível em: `http://127.0.0.1:8000`
+
+O banco de dados SQLite `pokemons.db` será criado de forma 100% automática na raiz do projeto assim que o servidor for inicializado.
 
 ---
 
 ## 🧪 Como Executar os Testes e Cobertura
 
-Para rodar a suíte de testes unitários e verificar a cobertura do código (gerando o relatório solicitado), execute:
+Para rodar a suíte de testes unitários e verificar a integridade das rotas fundamentais, execute:
 
 ```bash
 pytest --cov=app tests/ --cov-report=term-missing
@@ -128,142 +127,62 @@ pytest --cov=app tests/ --cov-report=term-missing
 
 ---
 
-## 🐳 Executando com Docker
+## 📸 Demonstração da API e Evidências do Sistema
 
-Se preferir rodar a aplicação isolada em um container:
+Abaixo estão documentadas as evidências visuais coletadas diretamente da interface do Swagger UI e dos ambientes operacionais, comprovando a eficácia e a conformidade técnica com o que foi exigido pelo corpo docente:
 
-1. **Construa a imagem Docker:**
-```bash
-docker build -t pokefast-api .
+### 1. Integração Externa e Links Paginados (`GET /pokemons`)
 
-```
+Consumo em lote paralelo dos dados da PokéAPI externa, gerando links dinâmicos de paginação de forma automatizada:
 
 
-2. **Execute o container passando as variáveis de ambiente:**
-```bash
-docker run -d -p 8000:8000 --env-file .env --name pokefast-app pokefast-api
+### 2. Busca Detalhada com Sucesso (`GET /pokemons/{id_or_name}`)
 
-```
+Mapeamento de tipos estruturados com tratamento completo para desconsiderar espaços e caixas altas:
 
 
+### 3. Resiliência e Erro Tratado (Status 404 Not Found)
 
----
+Tratamento nativo de exceções emitindo o código HTTP correto e o payload limpo esperado pelos testes unitários:
 
-## 📖 Documentação da API (Swagger UI)
 
-O FastAPI gera a documentação automaticamente. Com a API rodando, acesse:
+### 4. Documentação Automatizada Interativa (Swagger UI)
 
-* **Swagger UI (Interativo)**: `http://127.0.0.1:8000/docs`
+Interface interativa mapeando claramente as rotas de consumo externo e os endpoints dedicados ao gerenciamento do repositório persistente local:
 
----
 
-## 📌 Exemplos de Requisição e Resposta
+### 5. Persistência de Dados - Inserção Local (`POST /pokemons/local`)
 
-### 1. Listagem de Pokémons Paginada
+**[CREATE]** Endpoint responsável por criar e gravar um novo registro customizado fisicamente no banco de dados SQLite através do SQLAlchemy:
 
-**Requisição:**
-`GET /pokemons?limit=2&offset=0`
 
-**Resposta (JSON):**
+### 6. Consulta Geral do Repositório (`GET /pokemons/local/all`)
 
-```json
-{
-  "data": [
-    {
-      "name": "bulbasaur",
-      "id": 1,
-      "height": 7,
-      "weight": 69,
-      "types": ["grass", "poison"],
-      "sprites": {
-        "front_default": "[https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png)",
-        "back_default": "[https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/1.png](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/1.png)"
-      }
-    },
-    {
-      "name": "ivysaur",
-      "id": 2,
-      "height": 10,
-      "weight": 130,
-      "types": ["grass", "poison"],
-      "sprites": {
-        "front_default": "[https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png)",
-        "back_default": "[https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/2.png](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/2.png)"
-      }
-    }
-  ],
-  "pagination": {
-    "total": 1302,
-    "limit": 2,
-    "offset": 0,
-    "next": "[http://127.0.0.1:8000/pokemons?limit=2&offset=2](http://127.0.0.1:8000/pokemons?limit=2&offset=2)",
-    "previous": null
-  }
-}
+**[READ ALL]** Recuperação em tempo real de todos os Pokémons customizados salvos localmente:
 
-```
 
-### 2. Detalhes de um Pokémon Específico
+### 7. Atualização de Propriedades (`PUT /pokemons/local/{pokemon_id}`)
 
-**Requisição:**
-`GET /pokemons/pikachu` ou `GET /pokemons/25`
+**[UPDATE]** Edição completa de um registro relacional referenciado por sua respectiva chave primária:
 
-**Resposta (JSON):**
 
-```json
-{
-  "name": "pikachu",
-  "id": 25,
-  "height": 4,
-  "weight": 60,
-  "types": ["electric"],
-  "sprites": {
-    "front_default": "[https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png)",
-    "back_default": "[https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/25.png](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/25.png)"
-  }
-}
+### 8. Exclusão Física de Registro (`DELETE /pokemons/local/{pokemon_id}`)
 
-```
+**[DELETE]** Remoção definitiva de um Pokémon do banco de dados local com retorno apropriado de status `204 No Content`:
+
+
+### 9. Cobertura de Código Local (Pytest-Cov)
+
+Execução local da suite de testes alcançando alto índice de cobertura da lógica implementada no ecossistema:
+
+
+### 10. Integração Contínua (GitHub Actions Pipeline)
+
+Esteira de CI/CD automatizada validando com absoluto sucesso todas as builds e testes a cada modificação submetida:
+
 
 ---
 
-## 🚀 Links de Produção
-
-* **Link da API em Produção**: `https://pokefast-api-ebac.onrender.com` 
+Developed with 💻 inside GitHub Codespaces.
 
 ```
-
-```
-## 📸 Demonstração da API e Evidências de Testes
-
-Para comprovação dos critérios técnicos exigidos, seguem os registros visuais das respostas estruturadas da API, testes locais e integração contínua:
-
-### 1. Listagem Geral Paginada (`GET /pokemons`)
-Endpoint responsável por listar os Pokémons consumidos de forma assíncrona da PokéAPI, contendo a paginação estruturada dinamicamente com os campos `total`, `limit`, `offset`, `next` e `previous`:
-![Listagem Paginada](./screenshots/listagem.JPG)
-
-### 2. Busca por ID ou Nome (`GET /pokemons/{id_or_name}`)
-Endpoint de busca detalhada aplicando o tratamento de strings nativo (.strip().lower()). O retorno traz exatamente os campos mapeados (`id`, `name`, `height`, `weight`, `types` e o objeto estruturado de `sprites`):
-![Busca Detalhada por Nome](./screenshots/detalhes.JPG)
-
-### 2. Busca por ID ou Nome (`GET /pokemons/{id_or_name}`)
-
-#### A) Retorno com Sucesso (Status 200)
-Exemplo de requisição retornando os detalhes filtrados e tratados de um Pokémon existente:
-![Busca Detalhada por Nome](./screenshots/detalhes.JPG)
-
-#### B) Tratamento de Erro - Pokémon Não Encontrado (Status 404)
-Demonstração de resiliência da API ao lidar com parâmetros inválidos, retornando o status HTTP correto e uma mensagem clara para o usuário:
-![Erro Pokémon Não Encontrado](./screenshots/erro-404.JPG)
-
-### 3. Documentação Automatizada e Interativa (Swagger UI)
-Visão geral da estrutura gerada automaticamente pelo FastAPI mapeando e documentando de forma clara as rotas construídas:
-![Swagger UI](./screenshots/swagger.JPG)
-
-### 4. Cobertura de Testes Automatizados (Pytest-Cov)
-Execução da suíte de testes unitários localmente através do ambiente do Codespaces, atingindo com sucesso **95% de cobertura total** do código da aplicação:
-![Cobertura de Testes](./screenshots/teste-passou.JPG)
-
-### 5. Integração Contínua (GitHub Actions Pipeline)
-Esteira de CI/CD configurada via GitHub Actions executando com sucesso e sem falhas todas as validações estruturais e testes automáticos a cada commit realizado:
-![Pipeline de CI/CD](./screenshots/teste-ci.JPG)
