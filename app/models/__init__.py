@@ -23,3 +23,6 @@ class PaginationInfo(BaseModel):
 class PaginatedPokemonResponse(BaseModel):
     data: List[PokemonResponse]
     pagination: PaginationInfo
+
+
+from .pokemon import PokemonDB
