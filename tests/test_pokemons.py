@@ -181,3 +181,50 @@ def test_delete_pokemon_local_not_found_error(client):
     response = client.delete("/pokemons/local/999")
     assert response.status_code == 404
     assert response.json()["detail"] == "Não foi possível deletar: Pokémon local não encontrado."
+
+
+def test_create_pokemon_local_invalid_data_type_error(client):
+    """[POST ERRO 422] Testa a validação de dados ao enviar um tipo incorreto (height como texto)"""
+    pokemon_data = {
+        "name": "InvalidoTipo",
+        "height": "altura_invalida",  # Deveria ser um inteiro (int)
+        "weight": 130,
+        "types": ["normal"],
+        "sprite_front": "a",
+        "sprite_back": "b"
+    }
+    response = client.post("/pokemons/local", json=pokemon_data)
+    assert response.status_code == 422  # Erro de validação do Pydantic
+
+
+def test_create_pokemon_local_missing_required_field_error(client):
+    """[POST ERRO 422] Testa a validação de dados ao omitir um campo obrigatório (name)"""
+    pokemon_data = {
+        # "name" propositalmente ausente
+        "height": 10,
+        "weight": 130,
+        "types": ["normal"],
+        "sprite_front": "a",
+        "sprite_back": "b"
+    }
+    response = client.post("/pokemons/local", json=pokemon_data)
+    assert response.status_code == 422
+
+
+def test_update_pokemon_local_invalid_data_type_error(client):
+    """[PUT ERRO 422] Testa a validação de dados ao atualizar com um tipo incorreto (weight como texto)"""
+    # Cadastra um Pokémon válido primeiro
+    pokemon_data = {
+        "name": "ParaAtualizar", "height": 10, "weight": 50,
+        "types": ["normal"], "sprite_front": "a", "sprite_back": "b"
+    }
+    create_resp = client.post("/pokemons/local", json=pokemon_data)
+    pokemon_id = create_resp.json()["id"]
+
+    # Tenta atualizar com um tipo de dado inválido
+    invalid_update = {
+        "name": "Atualizado", "height": 10, "weight": "peso_invalido",
+        "types": ["normal"], "sprite_front": "a", "sprite_back": "b"
+    }
+    response = client.put(f"/pokemons/local/{pokemon_id}", json=invalid_update)
+    assert response.status_code == 422
