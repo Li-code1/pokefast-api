@@ -22,7 +22,7 @@ A aplicação está publicada de forma totalmente funcional e pode ser acessada 
 * **Gerenciamento de Cache**: Integração ativa com o **Redis** para armazenamento temporário estratégico (TTL) de listagens e detalhes de Pokémons, poupando requisições repetidas à API externa.
 * **Persistência Relacional Local (CRUD)**: Mapeamento ORM completo com **SQLAlchemy** e banco de dados **SQLite** para criação, leitura, atualização e deleção física de registros customizados.
 * **Tratamento Resiliente de Strings**: Sanitização forçada e automática em todos os parâmetros de entrada utilizando métodos nativos (`.strip().lower()`).
-* **Testes Automatizados**: Suíte de testes unitários com validação de status HTTP, payloads de resposta e fluxos de exceção (404 Not Found) usando `pytest` e `pytest-cov`.
+* **Testes Automatizados**: Suíte de testes unitários com validação de status HTTP, payloads de resposta e fluxos de exceção usando `pytest` e `pytest-cov`.
 * **CI/CD Pipeline**: Automação total integrada ao GitHub Actions para verificação de testes e integridade do código a cada push na branch principal.
 
 ---
@@ -55,9 +55,11 @@ pokefast-api/
 │       └── formatters.py       # Funções auxiliares de formatação de strings
 │
 ├── tests/
+│   ├── conftest.py             # Configuração de fixtures do pytest para o banco de dados
 │   └── test_pokemons.py        # Suíte de testes unitários com pytest
 │
 ├── .gitignore                  # Arquivos ignorados pelo Git (incluindo pokemons.db)
+├── pytest.ini                  # Configuração de caminhos do pytest
 ├── celery_app.py               # Configuração da instância e broker do Celery
 ├── docker-compose.yml          # Orquestração dos containers (API e Redis)
 ├── Dockerfile                  # Instruções de montagem da imagem Docker
@@ -79,14 +81,15 @@ pokefast-api/
 ### Passo a Passo
 
 1. **Clone o repositório:**
+
 ```bash
 git clone [https://github.com/Li-code1/pokefast-api.git](https://github.com/Li-code1/pokefast-api.git)
 cd pokefast-api
 
 ```
 
-
 2. **Crie e ative um ambiente virtual:**
+
 ```bash
 python -m venv .venv
 # No Windows:
@@ -96,21 +99,19 @@ source .venv/bin/activate
 
 ```
 
-
 3. **Instale as dependências atualizadas:**
+
 ```bash
 pip install -r requirements.txt
 
 ```
 
-
 4. **Inicie o servidor de desenvolvimento:**
+
 ```bash
 python -m uvicorn app.main:app --reload
 
 ```
-
-
 
 O banco de dados SQLite `pokemons.db` será criado de forma 100% automática na raiz do projeto assim que o servidor for inicializado.
 
@@ -121,7 +122,7 @@ O banco de dados SQLite `pokemons.db` será criado de forma 100% automática na 
 Para rodar a suíte de testes unitários e verificar a integridade das rotas fundamentais, execute:
 
 ```bash
-pytest --cov=app tests/ --cov-report=term-missing
+PYTHONPATH=. pytest --cov=app tests/ --cov-report=term-missing
 
 ```
 
@@ -151,24 +152,38 @@ Interface interativa mapeando claramente as rotas de consumo externo e os endpoi
 **[CREATE]** Endpoint responsável por criar e gravar um novo registro customizado fisicamente no banco de dados SQLite através do SQLAlchemy:
 ![Cadastro Local](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/1-create-local.jpg)
 
-### 6. Consulta Geral do Repositório (`GET /pokemons/local/all`)
+### 6. Tratamento de Erro - Inserção de Registro Duplicado (Status 400)
+Garante a integridade do banco de dados local impedindo que registros com nomes idênticos sejam duplicados:
+![Erro Pokémon Repetido](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/pokemon-repetido.JPG)
+
+### 7. Consulta Geral do Repositório (`GET /pokemons/local/all`)
 **[READ ALL]** Recuperação em tempo real de todos os Pokémons customizados salvos localmente:
 ![Listagem Local](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/2-read-all-local.jpg)
 
-### 7. Atualização de Propriedades (`PUT /pokemons/local/{pokemon_id}`)
+### 8. Erro de Consulta Local - Registro Inexistente (Status 404)
+Validação do comportamento do endpoint ao tentar buscar por uma chave primária ou nome que não constam na base de dados relacional:
+![Erro Consulta Local Não Encontrado](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/pokemon-nao-encontrado.JPG)
+
+### 9. Atualização de Propriedades (`PUT /pokemons/local/{pokemon_id}`)
 **[UPDATE]** Edição completa de um registro relacional referenciado por sua respectiva chave primária:
 ![Atualização Local](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/3-update-local.jpg)
 
-### 8. Exclusão Física de Registro (`DELETE /pokemons/local/{pokemon_id}`)
+### 10. Erro de Atualização - ID Inexistente (Status 404)
+Resposta estruturada emitida quando o usuário tenta alterar atributos de um Pokémon cujo identificador não existe:
+![Erro Atualização Não Encontrado](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/atualizacao-nao-encontrado.JPG)
+
+### 11. Exclusão Física de Registro (`DELETE /pokemons/local/{pokemon_id}`)
 **[DELETE]** Remoção definitiva de um Pokémon do banco de dados local com retorno apropriado de status `204 No Content`:
 ![Exclusão Local](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/4-delete-local.jpg)
 
-### 9. Cobertura de Código Local (Pytest-Cov)
+### 12. Erro de Remoção - ID Inexistente (Status 404)
+Validação de segurança impedindo a execução de deleções inválidas em registros inexistentes na base relacional:
+![Erro Deleção Não Encontrado](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/deletar-nao-encontrado.JPG)
+
+### 13. Cobertura de Código Local (Pytest-Cov)
 Execução local da suite de testes alcançando alto índice de cobertura da lógica implementada no ecossistema:
 ![Cobertura de Testes](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/teste-passou.JPG)
 
-### 10. Integração Contínua (GitHub Actions Pipeline)
+### 14. Integração Contínua (GitHub Actions Pipeline)
 Esteira de CI/CD automatizada validando com absoluto sucesso todas as builds e testes a cada modificação submetida:
 ![Pipeline de CI/CD](https://raw.githubusercontent.com/Li-code1/pokefast-api/main/screenshots/teste-ci.JPG)
-
-```

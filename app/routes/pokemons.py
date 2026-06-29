@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Query, HTTPException, Request, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
+from pydantic import BaseModel, ConfigDict
 
 # Importações dos seus Serviços e Esquemas Pydantic originais
 from app.services.poke_service import get_pokemons_list, get_pokemon_by_id_or_name
@@ -31,8 +32,7 @@ class PokemonLocalResponse(BaseModel):
     sprite_front: str
     sprite_back: str
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ==============================================================================
